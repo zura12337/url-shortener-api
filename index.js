@@ -2,6 +2,7 @@ const express = require("express")
 const mongoose = require("mongoose");
 const app = express();
 const http = require('http').Server(app);
+const url = require("./routes/url")
 
 mongoose.connect('mongodb://127.0.0.1', {
   useNewUrlParser: true,
@@ -15,6 +16,8 @@ mongoose.connect('mongodb://127.0.0.1', {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use("/", url);
 
 const port = 4000
 const server = http.listen(port, () => {

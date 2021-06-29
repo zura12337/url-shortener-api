@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
-const { Url, validate } = require("../models/Url");
-const { User, validate: validateUser } = require("../models/User");
+const { Url } = require("../models/Url");
+const { User } = require("../models/User");
 const shortid = require("shortid");
+const dateFormat = require("dateformat");
 
 router.post("/", async (req, res) => {
   const ip = req.socket.remoteAddress;
@@ -27,6 +28,7 @@ router.post("/", async (req, res) => {
     originalUrl,
     id,
     shortUrl,
+    generatedBy: user.ip,
   });
 
   url.save();
@@ -47,18 +49,37 @@ router.get("/:id", async (req, res) => {
     });
   }
 
+  const date = dateFormat(new Date(), "yyyy-mm-dd");
+
   if (!user.visitedLinks.includes(url._id)) {
     user.visitedLinks.push(url._id);
   }
-  url.visitors++;
-  if (!url.uniqueVisitors.includes(user._id)) {
-    url.uniqueVisitors.push(user._id);
+
+  url.visitors.push({
+    date,
+    ip: user.ip,
+  });
+
+  if (url.uniqueVisitors.length === 0) {
+    url.uniqueVisitors.push({
+      date,
+      ip: user.ip,
+    });
+  } else {
+    url.uniqueVisitors.forEach((visitor) => {
+      if (visitor.ip !== user.ip) {
+        url.uniqueVisitors.push({
+          date,
+          ip: user.ip,
+        });
+      }
+    });
   }
 
   user.save();
   url.save();
 
-  if (url.uniqueVisitors.includes) res.redirect(url.originalUrl);
+  res.redirect(url.originalUrl);
 });
 
 module.exports = router;

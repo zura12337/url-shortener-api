@@ -1,16 +1,28 @@
-const mongoose = require('mongoose');
-const Joi = require('joi');
+const mongoose = require("mongoose");
+const Joi = require("joi");
+const dateFormat = require("dateformat");
 
 const { Schema } = mongoose;
-
 
 const urlSchema = new Schema({
   originalUrl: String,
   id: { type: String },
   shortUrl: { type: String },
-  visitors: { type: Number, default: 0 },
-  uniqueVisitors: [{ type: Schema.Types.ObjectId, ref: "User" }],
-})
+  visitors: [
+    {
+      date: String,
+      ip: String,
+    },
+  ],
+  uniqueVisitors: [
+    {
+      date: String,
+      ip: String,
+    },
+  ],
+  generatedBy: { type: Schema.Types.ObjectId, ref: "User" },
+  date: { type: String, default: dateFormat(new Date(), "yyyy-mm-dd") },
+});
 
 const Url = mongoose.model("Url", urlSchema);
 
@@ -21,10 +33,9 @@ function validateUrl(url) {
     shortUrl: Joi.string(),
     visitors: Joi.string(),
     uniqueVisitors: Joi.array(),
-  })
+  });
   return schema.validate(url);
 }
 
 exports.Url = Url;
 exports.validate = validateUrl;
-

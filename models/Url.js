@@ -6,9 +6,10 @@ const { Schema } = mongoose;
 
 const urlSchema = new Schema({
   originalUrl: String,
-  shortenedUrl: { type: String, unique: true },
+  id: { type: String },
+  shortUrl: { type: String },
   visitors: { type: Number, default: 0 },
-  uniqueVisitors: { type: Number, default: 0 },
+  uniqueVisitors: [{ type: Schema.Types.ObjectId, ref: "User" }],
 })
 
 const Url = mongoose.model("Url", urlSchema);
@@ -16,9 +17,10 @@ const Url = mongoose.model("Url", urlSchema);
 function validateUrl(url) {
   const schema = Joi.object({
     originalUrl: Joi.string().required(),
-    shortenedUrl: Joi.string(),
+    id: Joi.string(),
+    shortUrl: Joi.string(),
     visitors: Joi.string(),
-    uniqueVisitors: Joi.string(),
+    uniqueVisitors: Joi.array(),
   })
   return schema.validate(url);
 }

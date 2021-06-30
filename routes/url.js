@@ -61,6 +61,13 @@ router.get("/urls/me", async (req, res) => {
   res.send(urls);
 });
 
+router.get("/statistics/:id", async (req, res) => {
+  const url = await Url.findOne({ id: req.params.id });
+  if(!url) return res.status(404).send("Url Not Found");
+
+  res.send(url)
+})
+
 router.get("/:id", async (req, res) => {
   const url = await Url.findOne({ id: req.params.id });
   if (!url) return res.send("Url not found");

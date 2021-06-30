@@ -5,7 +5,8 @@ const { Url } = require("../models/Url");
 const { User } = require("../models/User");
 const shortid = require("shortid");
 const dateFormat = require("dateformat");
-const urlMetadata = require('url-metadata');
+const urlMetadata = require("url-metadata");
+const parser = require("ua-parser-js");
 
 router.post("/", async (req, res) => {
   const ip = req.socket.remoteAddress;
@@ -64,13 +65,13 @@ router.get("/urls/me", async (req, res) => {
 
 router.get("/statistics/:id", async (req, res) => {
   const url = await Url.findOne({ id: req.params.id });
-  if(!url) return res.status(404).send("Url Not Found");
+  if (!url) return res.status(404).send("Url Not Found");
 
   let metadata = await urlMetadata(url.originalUrl);
-  metadata = (({ title, image }) => ({ title, image }))(metadata)
+  metadata = (({ title, image }) => ({ title, image }))(metadata);
 
-  res.send({ metadata, url })
-})
+  res.send({ metadata, url });
+});
 
 router.get("/:id", async (req, res) => {
   const url = await Url.findOne({ id: req.params.id });
@@ -83,6 +84,9 @@ router.get("/:id", async (req, res) => {
       ip,
     });
   }
+
+  let ua = parser(req.headers["user-agent"]);
+  ua = (({ os, browser }) => ({ os: os.name, browser: browser.name }))(ua);
 
   const date = dateFormat(new Date(), "yyyy-mm-dd");
 
@@ -99,16 +103,18 @@ router.get("/:id", async (req, res) => {
     url.uniqueVisitors.push({
       date,
       ip: user.ip,
+      os: ua.os,
+      browser: ua.browser,
     });
   } else {
-    url.uniqueVisitors.forEach((visitor) => {
-      if (visitor.ip !== user.ip) {
-        url.uniqueVisitors.push({
-          date,
-          ip: user.ip,
-        });
-      }
-    });
+    if (!url.uniqueVisitors.find((visitor) => visitor.ip === user.ip)) {
+      url.uniqueVisitors.push({
+        date,
+        ip: user.ip,
+        os: ua.os,
+        browser: ua.browser,
+      });
+    }
   }
 
   user.save();

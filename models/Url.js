@@ -18,6 +18,8 @@ const urlSchema = new Schema({
     {
       date: String,
       ip: String,
+      os: String,
+      browser: String,
     },
   ],
   generatedBy: { type: Schema.Types.ObjectId, ref: "User" },

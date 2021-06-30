@@ -5,6 +5,7 @@ const { Url } = require("../models/Url");
 const { User } = require("../models/User");
 const shortid = require("shortid");
 const dateFormat = require("dateformat");
+const urlMetadata = require('url-metadata');
 
 router.post("/", async (req, res) => {
   const ip = req.socket.remoteAddress;
@@ -56,7 +57,7 @@ router.get("/urls/me", async (req, res) => {
   const user = await User.findOne({ ip });
   if (!user) return res.send([]);
 
-  const urls = await Url.findById(user._id);
+  const urls = await Url.find({ generatedBy: user._id });
 
   res.send(urls);
 });
@@ -65,7 +66,10 @@ router.get("/statistics/:id", async (req, res) => {
   const url = await Url.findOne({ id: req.params.id });
   if(!url) return res.status(404).send("Url Not Found");
 
-  res.send(url)
+  let metadata = await urlMetadata(url.originalUrl);
+  metadata = (({ title, image }) => ({ title, image }))(metadata)
+
+  res.send({ metadata, url })
 })
 
 router.get("/:id", async (req, res) => {

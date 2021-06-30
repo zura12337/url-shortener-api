@@ -9,6 +9,19 @@ const dateFormat = require("dateformat");
 router.post("/", async (req, res) => {
   const ip = req.socket.remoteAddress;
 
+  var URLPattern = new RegExp(
+    "^(https?:\\/\\/)?" +
+      "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" +
+      "((\\d{1,3}\\.){3}\\d{1,3}))" +
+      "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" +
+      "(\\?[;&a-z\\d%_.~+=-]*)?" +
+      "(\\#[-a-z\\d_]*)?$",
+    "i"
+  );
+
+  if (!URLPattern.test(req.body.url))
+    return res.status(400).send("Enter valid URL");
+
   let user = await User.findOne({ ip });
   if (!user) {
     user = new User({
@@ -28,13 +41,24 @@ router.post("/", async (req, res) => {
     originalUrl,
     id,
     shortUrl,
-    generatedBy: user.ip,
+    generatedBy: user._id,
   });
 
   url.save();
   user.save();
 
   res.send(url);
+});
+
+router.get("/urls/me", async (req, res) => {
+  const ip = req.socket.remoteAddress;
+
+  const user = await User.findOne({ ip });
+  if (!user) return res.send([]);
+
+  const urls = await Url.findById(user._id);
+
+  res.send(urls);
 });
 
 router.get("/:id", async (req, res) => {

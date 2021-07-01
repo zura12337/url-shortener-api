@@ -38,7 +38,7 @@ router.post("/", async (req, res) => {
   const originalUrl = req.body.url;
 
   const id = shortid.generate();
-  const shortUrl = `http://localhost:4000/${id}`;
+  const shortUrl = `${process.env.WEBSITE_URL}/${id}`;
 
   url = new Url({
     originalUrl,

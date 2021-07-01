@@ -4,18 +4,13 @@ const app = express();
 const http = require("http").Server(app);
 const url = require("./routes/url");
 var cors = require("cors");
-const dotenv = requir("dotenv");
+const dotenv = require("dotenv");
 
 app.use(dotenv());
 
-mongoose.connect("mongodb://127.0.0.1", {
+mongoose.connect(process.env.MONGO_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  auth: {
-    user: "admin",
-    password: "admin",
-  },
-  dbName: "url-shortener",
 });
 
 app.use(express.json());

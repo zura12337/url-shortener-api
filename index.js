@@ -4,9 +4,7 @@ const app = express();
 const http = require("http").Server(app);
 const url = require("./routes/url");
 var cors = require("cors");
-const dotenv = require("dotenv");
-
-app.use(dotenv());
+require("dotenv").config();
 
 mongoose.connect(process.env.MONGO_URL, {
   useNewUrlParser: true,
@@ -19,6 +17,7 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use("/", url);
 
-const server = http.listen(process.env.PORT || 4000, () => {
+const port = process.env.PORT || 4000;
+const server = http.listen(port, () => {
   console.log(`Server is running on port ${port}...`);
 });

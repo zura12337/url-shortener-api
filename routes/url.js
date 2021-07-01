@@ -7,10 +7,9 @@ const shortid = require("shortid");
 const dateFormat = require("dateformat");
 const urlMetadata = require("url-metadata");
 const parser = require("ua-parser-js");
-const publicIp = require("public-ip");
 
 router.post("/", async (req, res) => {
-  const ip = await publicIp.p4();
+  const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
   var URLPattern = new RegExp(
     "^(https?:\\/\\/)?" +
@@ -56,8 +55,6 @@ router.post("/", async (req, res) => {
 router.get("/urls/me", async (req, res) => {
   const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-  console.log(ip);
-
   const user = await User.findOne({ ip });
   if (!user) return res.send([]);
 
@@ -80,7 +77,7 @@ router.get("/:id", async (req, res) => {
   const url = await Url.findOne({ id: req.params.id });
   if (!url) return res.send("Url not found");
 
-  const ip = await publicIp.p4();
+  const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
   let user = await User.findOne({ ip });
   if (!user) {
     user = new User({

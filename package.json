@@ -19,7 +19,6 @@
     "joi": "^17.4.0",
     "mongodb": "^3.6.9",
     "mongoose": "^5.13.0",
-    "public-ip": "^4.0.4",
     "shortid": "^2.2.16",
     "ua-parser-js": "^0.7.28",
     "url-metadata": "^2.5.0"

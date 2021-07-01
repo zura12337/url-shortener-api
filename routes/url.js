@@ -7,6 +7,7 @@ const shortid = require("shortid");
 const dateFormat = require("dateformat");
 const urlMetadata = require("url-metadata");
 const parser = require("ua-parser-js");
+const { lookup } = require("geoip-lite");
 
 router.post("/", async (req, res) => {
   const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
@@ -88,6 +89,8 @@ router.get("/:id", async (req, res) => {
   let ua = parser(req.headers["user-agent"]);
   ua = (({ os, browser }) => ({ os: os.name, browser: browser.name }))(ua);
 
+  const location = lookup(ip);
+
   const date = dateFormat(new Date(), "yyyy-mm-dd");
 
   if (!user.visitedLinks.includes(url._id)) {
@@ -105,6 +108,7 @@ router.get("/:id", async (req, res) => {
       ip: user.ip,
       os: ua.os,
       browser: ua.browser,
+      location: location.country,
     });
   } else {
     if (!url.uniqueVisitors.find((visitor) => visitor.ip === user.ip)) {
@@ -113,6 +117,7 @@ router.get("/:id", async (req, res) => {
         ip: user.ip,
         os: ua.os,
         browser: ua.browser,
+        location: location.country,
       });
     }
   }

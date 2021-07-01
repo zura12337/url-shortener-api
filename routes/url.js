@@ -108,7 +108,7 @@ router.get("/:id", async (req, res) => {
       ip: user.ip,
       os: ua.os,
       browser: ua.browser,
-      location: location.country,
+      location: `${location.country}, ${location.city}`,
     });
   } else {
     if (!url.uniqueVisitors.find((visitor) => visitor.ip === user.ip)) {

@@ -54,7 +54,9 @@ router.post("/", async (req, res) => {
 });
 
 router.get("/urls/me", async (req, res) => {
-  const ip = await publicIp.p4();
+  const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+
+  console.log(ip);
 
   const user = await User.findOne({ ip });
   if (!user) return res.send([]);

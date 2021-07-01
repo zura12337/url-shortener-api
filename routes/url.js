@@ -104,24 +104,21 @@ router.get("/:id", async (req, res) => {
   url.visitors.push({
     date,
     ip: user.ip,
+    os: ua.os,
+    browser: ua.browser,
+    location: `${location.country}, ${location.city}`,
   });
 
   if (url.uniqueVisitors.length === 0) {
     url.uniqueVisitors.push({
       date,
       ip: user.ip,
-      os: ua.os,
-      browser: ua.browser,
-      location: `${location.country}, ${location.city}`,
     });
   } else {
     if (!url.uniqueVisitors.find((visitor) => visitor.ip === user.ip)) {
       url.uniqueVisitors.push({
         date,
         ip: user.ip,
-        os: ua.os,
-        browser: ua.browser,
-        location: `${location.country}, ${location.city}`,
       });
     }
   }

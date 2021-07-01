@@ -68,8 +68,12 @@ router.get("/statistics/:id", async (req, res) => {
   const url = await Url.findOne({ id: req.params.id });
   if (!url) return res.status(404).send("Url Not Found");
 
-  // let metadata = await urlMetadata(url.originalUrl);
-  // metadata = (({ title, image }) => ({ title, image }))(metadata);
+  let metadata = await urlMetadata(url.originalUrl).catch((e) => {
+    console.log(e);
+  });
+  if (metadata) {
+    metadata = (({ title, image }) => ({ title, image }))(metadata);
+  }
 
   res.send({ metadata, url });
 });

@@ -126,7 +126,7 @@ router.get("/:id", async (req, res) => {
   user.save();
   url.save();
 
-  res.redirect(url.originalUrl);
+  res.json(url.originalUrl);
 });
 
 module.exports = router;

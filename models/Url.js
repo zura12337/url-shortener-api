@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const Joi = require("joi");
 const dateFormat = require("dateformat");
 
 const { Schema } = mongoose;
@@ -29,16 +28,4 @@ const urlSchema = new Schema({
 
 const Url = mongoose.model("Url", urlSchema);
 
-function validateUrl(url) {
-  const schema = Joi.object({
-    originalUrl: Joi.string().required(),
-    id: Joi.string(),
-    shortUrl: Joi.string(),
-    visitors: Joi.string(),
-    uniqueVisitors: Joi.array(),
-  });
-  return schema.validate(url);
-}
-
 exports.Url = Url;
-exports.validate = validateUrl;

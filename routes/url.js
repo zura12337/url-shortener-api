@@ -59,7 +59,7 @@ router.get("/urls/me", async (req, res) => {
   const user = await User.findOne({ ip });
   if (!user) return res.send([]);
 
-  const urls = await Url.find({ generatedBy: user._id });
+  const urls = await Url.find({ generatedBy: user._id }).sort("-date");
 
   res.send(urls);
 });

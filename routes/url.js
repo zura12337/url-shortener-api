@@ -25,7 +25,9 @@ router.post("/url", auth, async (req, res) => {
     return res.status(400).send("Enter valid URL");
 
   let url = await Url.findOne({ originalUrl: req.body.url });
-  if (url) return res.send(url);
+  if(url && url.generatedBy === req.user) {
+    return res.send(url);
+  }
 
   const originalUrl = req.body.url;
 
@@ -141,7 +143,7 @@ router.get("/urls/me", async (req, res) => {
   const user = await User.findOne({ ip });
   if (!user) return res.send([]);
 
-  const urls = await Url.find({ generatedBy: user._id }).sort({ _id: -1 });
+  const urls = await Url.find({ generatedBy: user.ip }).sort({ _id: -1 });
 
   res.send(urls);
 });

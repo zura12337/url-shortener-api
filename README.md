@@ -50,3 +50,5 @@
  4. Checks if user is in uniqueVisitors massive.
  5. Redirects user to original URL.
 
+### How many links can service handle?
+##### Sevice can handle 20 link per user. User also can remove their generated link and replace it with a new one

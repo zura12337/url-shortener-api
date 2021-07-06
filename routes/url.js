@@ -36,7 +36,7 @@ router.post("/url", auth, async (req, res) => {
     originalUrl,
     id,
     shortUrl,
-    generatedBy: user._id,
+    generatedBy: user.ip,
   });
 
   url.save();
@@ -45,9 +45,19 @@ router.post("/url", auth, async (req, res) => {
   res.send(url);
 });
 
-router.put("/url/pause", auth, async (req, res) => {
-  
-})
+router.put("/url/edit", auth, async (req, res) => {
+  const url = await Url.findOne({ id: req.body.id });
+
+  if(url.generatedBy === req.user) {
+    if(req.body.action === "pause") url.status === "paused";
+    if(req.body.action === "unpause") url.status === "active";
+    if(req.body.action === "remove") url.status === "removed";
+  };
+
+  await url.save();
+
+  res.send(url.status);
+});
 
 router.get("/url/:id", auth, async (req, res) => {
   const url = await Url.findOne({ id: req.params.id });

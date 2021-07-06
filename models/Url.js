@@ -24,6 +24,7 @@ const urlSchema = new Schema({
   ],
   generatedBy: { type: Schema.Types.ObjectId, ref: "User" },
   date: { type: String, default: dateFormat(new Date(), "yyyy-mm-dd") },
+  status: { type: String, default: "active" },
 });
 
 const Url = mongoose.model("Url", urlSchema);

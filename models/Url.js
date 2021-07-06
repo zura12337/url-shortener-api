@@ -22,7 +22,7 @@ const urlSchema = new Schema({
       ip: String,
     },
   ],
-  generatedBy: { type: Schema.Types.ObjectId, ref: "User" },
+  generatedBy: { type: String },
   date: { type: String, default: dateFormat(new Date(), "yyyy-mm-dd") },
   status: { type: String, default: "active" },
 });

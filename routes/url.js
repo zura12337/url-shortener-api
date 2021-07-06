@@ -9,7 +9,7 @@ const urlMetadata = require("url-metadata");
 const parser = require("ua-parser-js");
 const { lookup } = require("geoip-lite");
 
-router.post("/", async (req, res) => {
+router.post("/url", async (req, res) => {
   const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
   var URLPattern = new RegExp(
@@ -53,32 +53,7 @@ router.post("/", async (req, res) => {
   res.send(url);
 });
 
-router.get("/urls/me", async (req, res) => {
-  const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
-
-  const user = await User.findOne({ ip });
-  if (!user) return res.send([]);
-
-  const urls = await Url.find({ generatedBy: user._id }).sort({ _id: -1 });
-
-  res.send(urls);
-});
-
-router.get("/statistics/:id", async (req, res) => {
-  const url = await Url.findOne({ id: req.params.id });
-  if (!url) return res.status(404).send("Url Not Found");
-
-  let metadata = await urlMetadata(url.originalUrl).catch((e) => {
-    console.log(e);
-  });
-  if (metadata) {
-    metadata = (({ title, image }) => ({ title, image }))(metadata);
-  }
-
-  res.send({ metadata, url });
-});
-
-router.get("/:id", async (req, res) => {
+router.get("/url/:id", async (req, res) => {
   const url = await Url.findOne({ id: req.params.id });
   if (!url) return res.send("Url not found");
 
@@ -106,7 +81,7 @@ router.get("/:id", async (req, res) => {
     ip: user.ip,
     os: ua.os,
     browser: ua.browser,
-    location: `${location.country}, ${location.city}`,
+    location: location ? `${location.country}, ${location.city}` : "N/A",
   });
 
   if (url.uniqueVisitors.length === 0) {
@@ -128,5 +103,46 @@ router.get("/:id", async (req, res) => {
 
   res.json(url.originalUrl);
 });
+
+
+router.get("/urls/me", async (req, res) => {
+  const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+
+  const user = await User.findOne({ ip });
+  if (!user) return res.send([]);
+
+  const urls = await Url.find({ generatedBy: user._id }).sort({ _id: -1 });
+
+  res.send(urls);
+});
+
+router.get("/statistics/:id", async (req, res) => {
+  const url = await Url.findOne({ id: req.params.id });
+  if (!url) return res.status(404).send("Url Not Found");
+
+  let metadata = await urlMetadata(url.originalUrl).catch((e) => {
+    console.log(e);
+  });
+  if (metadata) {
+    metadata = (({ title, image }) => ({ title, image }))(metadata);
+  }
+
+  res.send({ metadata, url });
+});
+
+router.get("/visited", async(req, res) => {
+  const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+
+  let user = await User.findOne({ ip }).populate("visitedLinks");
+  if (!user) {
+    user = new User({
+      ip,
+    });
+    return res.send([]);
+  }
+
+  res.send(user.visitedLinks);
+})
+
 
 module.exports = router;

@@ -36,22 +36,37 @@ router.post("/url", auth, async (req, res) => {
     originalUrl,
     id,
     shortUrl,
-    generatedBy: user.ip,
+    generatedBy: req.user,
   });
 
   url.save();
-  user.save();
 
   res.send(url);
 });
 
 router.put("/url/edit", auth, async (req, res) => {
-  const url = await Url.findOne({ id: req.body.id });
+  let url = await Url.findOne({ id: req.body.id });
 
   if(url.generatedBy === req.user) {
-    if(req.body.action === "pause") url.status === "paused";
-    if(req.body.action === "unpause") url.status === "active";
-    if(req.body.action === "remove") url.status === "removed";
+    url.status = req.body.action;
+    if(req.body.action === "remove") {
+      url = await Url.findOneAndUpdate({ id: req.body.id }, 
+        {
+          id: url.id,
+          status: "remove",
+          originalUrl: "",
+          shortUrl: "",
+          visitors: [],
+          uniqueVisitors: [],
+          generatedBy: "",
+        }, 
+       { new: true });
+    }
+    if(req.body.action === "unpause") {
+      url.status = "active";
+    }
+  } else {
+    return res.status(403).send("You don't have permissions to edit this URL")
   };
 
   await url.save();
@@ -61,8 +76,13 @@ router.put("/url/edit", auth, async (req, res) => {
 
 router.get("/url/:id", auth, async (req, res) => {
   const url = await Url.findOne({ id: req.params.id });
-  if (!url) return res.send("Url not found");
-console.log(req.user);
+  if (!url) return res.status(404).send("Url not found");
+
+  if(url.status === "pause") {
+    return res.status(403).send("Sorry, URL is paused by it's owner");
+  } else if(url.status === "remove"){
+    return res.status(403).send("Sorry, URL has been removed by it's owner");
+  }
 
   let ua = parser(req.headers["user-agent"]);
   ua = (({ os, browser }) => ({ os: os.name, browser: browser.name }))(ua);

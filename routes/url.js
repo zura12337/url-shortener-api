@@ -44,6 +44,15 @@ router.post("/url", auth, async (req, res) => {
   res.send(url);
 });
 
+router.get("/role/:id", auth, async(req, res) => {
+  let url = await Url.findOne({ id: req.params.id });
+  if(url.generatedBy === req.user) {
+    res.send("admin");
+  } else {
+    res.send("user");
+  }
+})
+
 router.put("/url/edit", auth, async (req, res) => {
   let url = await Url.findOne({ id: req.body.id });
 

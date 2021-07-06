@@ -11,6 +11,7 @@ const { lookup } = require("geoip-lite");
 const auth = require('../middleware/auth');
 
 router.post("/url", auth, async (req, res) => {
+
   var URLPattern = new RegExp(
     "^(https?:\\/\\/)?" +
       "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" +
@@ -23,6 +24,11 @@ router.post("/url", auth, async (req, res) => {
 
   if (!URLPattern.test(req.body.url))
     return res.status(400).send("Enter valid URL");
+
+  const createdUrls = await Url.find({ generatedBy: req.user });
+  if(createdUrls.length === 20) {
+    return res.status(503).send("You reached limit")
+  } 
 
   let url = await Url.findOne({ originalUrl: req.body.url });
   if(url && url.generatedBy === req.user) {
@@ -90,7 +96,7 @@ router.get("/url/:id", auth, async (req, res) => {
   if (!url) return res.status(404).send("Url not found");
 
   if(url.status === "pause") {
-    return res.status(403).send("Sorry, URL is paused by it's owner");
+    return res.status(403).send("Sorry, URL is disabled by it's owner");
   } else if(url.status === "remove"){
     return res.status(403).send("Sorry, URL has been removed by it's owner");
   }

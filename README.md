@@ -10,7 +10,7 @@
 ---
 
 ### 🔚 Routes
-- `POST /` -  Create new short url.
+- `POST /api/url` -  Create new short url.
 ##### Example body: 
 ```
 {
@@ -27,11 +27,23 @@
 	"generatedBy": "60e189de06155500153a48a7"
 	"visitors": [],
 	"uniqueVisitors: [],
+	"status": "active",
 }
 ```
-- `GET /:id` - Redirect to original url and add user to visitors massive
-- `GET /statistics/:id` - Returns url information by it's id
-- `GET /urls/me` - Returns all my generated urls.
+- `GET /api/url/:id` - Redirect to original url and add user to visitors massive
+- `GET /api/statistics/:id` - Returns url information by it's id
+- `GET /api/urls/me` - Returns all my generated urls.
+- `GET /api/role/:id` - Returns user role for given url (for example: admin || user)
+- `PUT /api/url/edit` - Update status of URL
+##### Example body: 
+```
+{
+  "id": "kE4WEp8Dm",
+  "status": "pause",
+}
+```
+- `GET /api/visited` - Returns all visited urls for user, including removed ones.
+
 
 
 ### Whats is definiton of user?

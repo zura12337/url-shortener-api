@@ -10,6 +10,7 @@ async function auth(req, res, next) {
     user = new User({
       ip,
     });
+    user.save();
   } else {
     next();
   }

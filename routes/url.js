@@ -8,10 +8,9 @@ const dateFormat = require("dateformat");
 const urlMetadata = require("url-metadata");
 const parser = require("ua-parser-js");
 const { lookup } = require("geoip-lite");
+const auth = require('../middleware/auth');
 
-router.post("/url", async (req, res) => {
-  const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
-
+router.post("/url", auth, async (req, res) => {
   var URLPattern = new RegExp(
     "^(https?:\\/\\/)?" +
       "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" +
@@ -24,13 +23,6 @@ router.post("/url", async (req, res) => {
 
   if (!URLPattern.test(req.body.url))
     return res.status(400).send("Enter valid URL");
-
-  let user = await User.findOne({ ip });
-  if (!user) {
-    user = new User({
-      ip,
-    });
-  }
 
   let url = await Url.findOne({ originalUrl: req.body.url });
   if (url) return res.send(url);
@@ -53,22 +45,21 @@ router.post("/url", async (req, res) => {
   res.send(url);
 });
 
-router.get("/url/:id", async (req, res) => {
+router.put("/url/pause", auth, async (req, res) => {
+  
+})
+
+router.get("/url/:id", auth, async (req, res) => {
   const url = await Url.findOne({ id: req.params.id });
   if (!url) return res.send("Url not found");
-
-  const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
-  let user = await User.findOne({ ip });
-  if (!user) {
-    user = new User({
-      ip,
-    });
-  }
+console.log(req.user);
 
   let ua = parser(req.headers["user-agent"]);
   ua = (({ os, browser }) => ({ os: os.name, browser: browser.name }))(ua);
 
-  const location = lookup(ip);
+  const user = await User.findOne({ ip: req.user });
+
+  const location = lookup(user.ip);
 
   const date = dateFormat(new Date(), "yyyy-mm-dd");
 
@@ -130,16 +121,8 @@ router.get("/statistics/:id", async (req, res) => {
   res.send({ metadata, url });
 });
 
-router.get("/visited", async(req, res) => {
-  const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
-
-  let user = await User.findOne({ ip }).populate("visitedLinks");
-  if (!user) {
-    user = new User({
-      ip,
-    });
-    return res.send([]);
-  }
+router.get("/visited", auth, async(req, res) => {
+  let user = await User.findOne({ ip: req.user }).populate("visitedLinks");
 
   res.send(user.visitedLinks);
 })

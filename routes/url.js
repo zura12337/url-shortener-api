@@ -12,7 +12,7 @@ const auth = require("../middleware/auth");
 
 router.post("/url", auth, async (req, res) => {
   const expression =
-    /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
+    /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
   const URLPattern = new RegExp(expression);
 
   if (!URLPattern.test(req.body.url))

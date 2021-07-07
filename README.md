@@ -2,6 +2,7 @@
 
 #### Project setup 🔧
 -   npm install / yarn install
+-   Modify`.env` file
 ##### Dev 🎬
 -   npm  / yarn start
 ##### Build 🏗️

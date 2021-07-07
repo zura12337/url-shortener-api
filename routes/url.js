@@ -8,30 +8,23 @@ const dateFormat = require("dateformat");
 const urlMetadata = require("url-metadata");
 const parser = require("ua-parser-js");
 const { lookup } = require("geoip-lite");
-const auth = require('../middleware/auth');
+const auth = require("../middleware/auth");
 
 router.post("/url", auth, async (req, res) => {
-
-  var URLPattern = new RegExp(
-    "^(https?:\\/\\/)?" +
-      "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" +
-      "((\\d{1,3}\\.){3}\\d{1,3}))" +
-      "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" +
-      "(\\?[;&a-z\\d%_.~+=-]*)?" +
-      "(\\#[-a-z\\d_]*)?$",
-    "i"
-  );
+  const expression =
+    /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
+  const URLPattern = new RegExp(expression);
 
   if (!URLPattern.test(req.body.url))
     return res.status(400).send("Enter valid URL");
 
   const createdUrls = await Url.find({ generatedBy: req.user });
-  if(createdUrls.length === 20) {
-    return res.status(503).send("You reached limit")
-  } 
+  if (createdUrls.length === 20) {
+    return res.status(503).send("You reached limit");
+  }
 
   let url = await Url.findOne({ originalUrl: req.body.url });
-  if(url && url.generatedBy === req.user) {
+  if (url && url.generatedBy === req.user) {
     return res.send(url);
   }
 
@@ -52,22 +45,23 @@ router.post("/url", auth, async (req, res) => {
   res.send(url);
 });
 
-router.get("/role/:id", auth, async(req, res) => {
+router.get("/role/:id", auth, async (req, res) => {
   let url = await Url.findOne({ id: req.params.id });
-  if(url.generatedBy === req.user) {
+  if (url.generatedBy === req.user) {
     res.send("admin");
   } else {
     res.send("user");
   }
-})
+});
 
 router.put("/url/edit", auth, async (req, res) => {
   let url = await Url.findOne({ id: req.body.id });
 
-  if(url.generatedBy === req.user) {
+  if (url.generatedBy === req.user) {
     url.status = req.body.action;
-    if(req.body.action === "remove") {
-      url = await Url.findOneAndUpdate({ id: req.body.id }, 
+    if (req.body.action === "remove") {
+      url = await Url.findOneAndUpdate(
+        { id: req.body.id },
         {
           id: url.id,
           status: "remove",
@@ -76,15 +70,16 @@ router.put("/url/edit", auth, async (req, res) => {
           visitors: [],
           uniqueVisitors: [],
           generatedBy: "",
-        }, 
-       { new: true });
+        },
+        { new: true }
+      );
     }
-    if(req.body.action === "unpause") {
+    if (req.body.action === "unpause") {
       url.status = "active";
     }
   } else {
-    return res.status(403).send("You don't have permissions to edit this URL")
-  };
+    return res.status(403).send("You don't have permissions to edit this URL");
+  }
 
   await url.save();
 
@@ -95,9 +90,9 @@ router.get("/url/:id", auth, async (req, res) => {
   const url = await Url.findOne({ id: req.params.id });
   if (!url) return res.status(404).send("Url not found");
 
-  if(url.status === "pause") {
+  if (url.status === "pause") {
     return res.status(403).send("Sorry, URL is disabled by it's owner");
-  } else if(url.status === "remove"){
+  } else if (url.status === "remove") {
     return res.status(403).send("Sorry, URL has been removed by it's owner");
   }
 
@@ -142,7 +137,6 @@ router.get("/url/:id", auth, async (req, res) => {
   res.json(url.originalUrl);
 });
 
-
 router.get("/urls/me", async (req, res) => {
   const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
@@ -168,11 +162,10 @@ router.get("/statistics/:id", async (req, res) => {
   res.send({ metadata, url });
 });
 
-router.get("/visited", auth, async(req, res) => {
+router.get("/visited", auth, async (req, res) => {
   let user = await User.findOne({ ip: req.user }).populate("visitedLinks");
 
   res.send(user.visitedLinks);
-})
-
+});
 
 module.exports = router;

@@ -61,7 +61,7 @@
  2. Looks up for user location by it's IP Address
  3. Parses user-agent header and get's information about what OS and browser is user using
  4. Checks if user is in uniqueVisitors massive.
- 5. Redirects user to original URL.
+ 5. Returns original url.
 
 ### How many links can service handle?
 ##### Sevice can handle 20 link per user. User also can remove their generated link and replace it with a new one

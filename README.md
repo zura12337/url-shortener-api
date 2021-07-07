@@ -2,7 +2,7 @@
 
 #### Project setup 🔧
 -   npm install / yarn install
--   Modify`.env` file
+-   Modify`.env` file, note that React is using HashRouter for routing, so you have to add `/#` end of WEBSITE_URL variable (for example: http://localhost:3000/#).
 ##### Dev 🎬
 -   npm  / yarn start
 ##### Build 🏗️
